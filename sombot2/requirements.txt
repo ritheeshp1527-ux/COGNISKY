@@ -1,0 +1,8 @@
+flask
+python-dotenv
+transformers
+vaderSentiment
+lime
+numpy
+google-generativeai
+torch

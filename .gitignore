@@ -1,0 +1,15 @@
+# Environments
+venv/
+venv2/
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+
+# Mac
+.DS_Store
