@@ -106,7 +106,7 @@ def chat():
     conversation_history.append({"role": "user", "content": message})
 
     # reply (for now skipping full safety for clarity)
-    prompt = f"You are SOMBOT, a calm companion. User said: {message}. Reply kindly."
+    prompt = f"You are COGNISKY, a calm companion. User said: {message}. Reply kindly."
     try:
         resp = gemini.generate_content(prompt)
         reply = (resp.text or "").strip()
@@ -150,7 +150,7 @@ def analyse():
     why = explain_why_with_lime(mood, weighted_words, suggestion)
 
     pretty = (
-        f"SOMBOT:\n"
+        f"COGNISKY:\n"
         f"🧠 Mood detected: {mood}\n"
         f"📊 Severity: {severity}/10 (compound={compound:.2f})\n"
         f"💡 Suggestion: {suggestion}\n\n"

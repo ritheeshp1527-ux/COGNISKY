@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SOMBOT - Calm Mode</title>
+  <title>COGNISKY - Calm Mode</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* ===== Animated Background Gradient + Stone Image ===== */
@@ -95,7 +95,7 @@ button {
 
   <div class="w-[70%] flex flex-col h-[90vh] bg-white/50 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden z-10 relative">
     <header class="bg-white/70 backdrop-blur-md shadow px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-      <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 SOMBOT</h1>
+      <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 COGNISKY</h1>
       <div class="flex space-x-3">
         <button id="analyseBtn" class="px-4 py-2 bg-teal-500 text-white rounded-xl shadow hover:bg-teal-600 transition">
           Analyse
@@ -131,7 +131,7 @@ button {
       const label = document.createElement("div");
       label.className = "text-sm font-extrabold mb-1 tracking-wide " + 
         (from === "user" ? "text-blue-800" : from === "bot" ? "text-teal-800" : "text-emerald-800");
-      label.innerText = from === "user" ? "YOU:" : from === "bot" ? "SOMBOT:" : "📊 ANALYSIS:";
+      label.innerText = from === "user" ? "YOU:" : from === "bot" ? "COGNISKY:" : "📊 ANALYSIS:";
 
       const bubble = document.createElement("div");
       bubble.className = (from === "user"
