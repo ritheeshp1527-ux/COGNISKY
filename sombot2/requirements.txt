@@ -6,3 +6,6 @@ lime
 numpy
 google-generativeai
 torch
+flask-sqlalchemy
+flask-login
+flask-bcrypt

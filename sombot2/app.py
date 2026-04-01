@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 import os
 from dotenv import load_dotenv
 from transformers import pipeline
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from lime.lime_text import LimeTextExplainer
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
 import numpy as np
 import google.generativeai as genai
 import json
@@ -17,6 +21,53 @@ if not API_KEY:
 
 # ---------------- Flask ----------------
 app = Flask(__name__, template_folder="templates")
+app.config['SECRET_KEY'] = 'some_secure_secret_cognisky'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cognisky.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    chat_sessions = db.relationship('ChatSession', backref='author', lazy=True)
+    cognitive_results = db.relationship('CognitiveSurveyResult', backref='author', lazy=True)
+
+class ChatSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mood = db.Column(db.String(50), nullable=True)
+    severity = db.Column(db.Integer, nullable=True)
+    messages = db.relationship('Message', backref='chat', lazy=True)
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
+    role = db.Column(db.String(10), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+
+class CognitiveSurveyResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_taken = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    problem_solving = db.Column(db.Float, nullable=False)
+    numerical = db.Column(db.Float, nullable=False)
+    emotional_intelligence = db.Column(db.Float, nullable=False)
+    hypothesis = db.Column(db.Float, nullable=False)
+    memory = db.Column(db.Float, nullable=False)
+    total_score = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(20), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 # ---------------- Models ----------------
 genai.configure(api_key=API_KEY)
@@ -36,7 +87,8 @@ label_to_idx = {lbl: i for i, lbl in enumerate(label_order)}
 explainer = LimeTextExplainer(class_names=label_order, random_state=42)
 vader_analyzer = SentimentIntensityAnalyzer()
 
-conversation_history = []
+# global history removed in favor of db
+# conversation_history = []
 
 
 # ---------------- Helpers ----------------
@@ -90,20 +142,134 @@ def explain_why_with_lime(mood: str, lime_words: list, suggestion: str) -> str:
 # ---------------- Routes ----------------
 @app.route("/")
 def entry():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     return render_template("entry.html")
 
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        username = request.form.get("username").strip()
+        password = request.form.get("password")
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists. Please choose a different one.', 'danger')
+        else:
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            user = User(username=username, password=hashed_password)
+            db.session.add(user)
+            db.session.commit()
+            flash('Your account has been created! You are now able to log in', 'success')
+            return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        username = request.form.get("username").strip()
+        password = request.form.get("password")
+        user = User.query.filter_by(username=username).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user, remember=True)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html')
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    session.pop('active_chat_id', None)
+    return redirect(url_for('entry'))
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    sessions = ChatSession.query.filter_by(user_id=current_user.id).order_by(ChatSession.date_created.desc()).all()
+    surveys = CognitiveSurveyResult.query.filter_by(user_id=current_user.id).order_by(CognitiveSurveyResult.date_taken.desc()).all()
+    return render_template("dashboard.html", sessions=sessions, surveys=surveys)
+
+@app.route("/survey", methods=["GET"])
+@login_required
+def survey():
+    return render_template("survey.html")
+
+@app.route("/submit_survey", methods=["POST"])
+@login_required
+def submit_survey():
+    # Helper to calculate average directly from the raw form since User wants (sum/20)*5 mapping.
+    # Actually, the user mapping: "Section Score = Sum of 4 questions. Normalized Score = (Score / 20) * 5".
+    # Since questions are on Likert Scale (1..5), 4 questions max sum = 20. Thus (sum/20)*5 is simply the average of the 4 questions.
+    def compute_category(avg):
+        if avg < 2: return "Low"
+        elif 2 <= avg <= 3.5: return "Medium"
+        return "High"
+        
+    def calc_score(prefix, num_normal, num_reverse_idx):
+        score = sum(int(request.form.get(f"{prefix}_{i}", 3)) for i in range(1, num_normal + 1))
+        # Reverse scaling for the final trigger question
+        score += (6 - int(request.form.get(f"{prefix}_{num_reverse_idx}", 3)))
+        return score / float(num_normal + 1)
+    
+    ps = calc_score('ps', 8, 9)
+    num = calc_score('num', 8, 9)
+    ei = calc_score('ei', 8, 9)
+    hyp = calc_score('hyp', 8, 9)
+    mem = calc_score('mem', 8, 9)
+    
+    total = sum([ps, num, ei, hyp, mem]) / 5.0
+    cat = compute_category(total)
+    
+    result = CognitiveSurveyResult(
+        user_id=current_user.id,
+        problem_solving=ps,
+        numerical=num,
+        emotional_intelligence=ei,
+        hypothesis=hyp,
+        memory=mem,
+        total_score=total,
+        category=cat
+    )
+    db.session.add(result)
+    db.session.commit()
+    return redirect(url_for('survey_result', result_id=result.id))
+
+@app.route("/survey_result/<int:result_id>")
+@login_required
+def survey_result(result_id):
+    res = CognitiveSurveyResult.query.get_or_404(result_id)
+    if res.user_id != current_user.id:
+        return redirect(url_for('dashboard'))
+    return render_template("survey_result.html", result=res)
+
 @app.route("/chat")
+@login_required
 def chat_page():
+    if 'active_chat_id' not in session:
+        new_session = ChatSession(user_id=current_user.id)
+        db.session.add(new_session)
+        db.session.commit()
+        session['active_chat_id'] = new_session.id
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
+@login_required
 def chat():
     data = request.get_json(silent=True) or {}
     message = (data.get("message") or "").strip()
     if not message:
         return jsonify({"reply": "Please type something so I can respond."})
 
-    conversation_history.append({"role": "user", "content": message})
+    active_id = session.get('active_chat_id')
+    if not active_id:
+        return jsonify({"reply": "Session error. Please refresh the page."})
+    
+    user_msg = Message(session_id=active_id, role="user", content=message)
+    db.session.add(user_msg)
 
     # reply (for now skipping full safety for clarity)
     prompt = f"You are COGNISKY, a calm companion. User said: {message}. Reply kindly."
@@ -113,16 +279,26 @@ def chat():
     except Exception:
         reply = "I'm here with you. Take a deep breath—you're not alone."
 
-    conversation_history.append({"role": "bot", "content": reply})
+    bot_msg = Message(session_id=active_id, role="bot", content=reply)
+    db.session.add(bot_msg)
+    db.session.commit()
+
     return jsonify({"reply": reply})
 
 
 @app.route("/analyse", methods=["POST"])
+@login_required
 def analyse():
-    if not conversation_history:
-        return jsonify({"analysis": "No conversation yet. Say something first."})
+    active_id = session.get('active_chat_id')
+    if not active_id:
+        return jsonify({"analysis": "No active conversation to analyse."})
+        
+    user_messages = Message.query.filter_by(session_id=active_id, role="user").all()
+    if not user_messages:
+        return jsonify({"analysis": "No user conversation yet. Say something first."})
 
-    user_text = " ".join(m["content"] for m in conversation_history if m["role"] == "user")
+    chat_session = ChatSession.query.get(active_id)
+    user_text = " ".join(m.content for m in user_messages)
 
     try:
         mood, scores = analyse_emotion(user_text)
@@ -149,24 +325,32 @@ def analyse():
     suggestion = suggest(user_text, mood)
     why = explain_why_with_lime(mood, weighted_words, suggestion)
 
-    pretty = (
-        f"COGNISKY:\n"
-        f"🧠 Mood detected: {mood}\n"
-        f"📊 Severity: {severity}/10 (compound={compound:.2f})\n"
-        f"💡 Suggestion: {suggestion}\n\n"
-        f"🤔 Why? {why}\n\n"
-        f"📝 LIME words: {lime_text}"
-    )
+    chat_session.mood = mood
+    chat_session.severity = severity
+    db.session.commit()
 
-    return jsonify({"analysis": pretty})
+    return jsonify({
+        "analysis": {
+            "mood": mood,
+            "severity": severity,
+            "compound": round(compound, 2),
+            "suggestion": suggestion,
+            "why": why,
+            "lime_words": [{"word": w, "weight": wt} for w, wt in weighted_words] if weighted_words else [],
+            "lime_error": None if weighted_words else lime_text
+        }
+    })
 
 
 @app.route("/reset", methods=["POST"])
+@login_required
 def reset():
-    global conversation_history
-    conversation_history = []
+    session.pop('active_chat_id', None)
     return jsonify({"status": "reset"})
 
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)

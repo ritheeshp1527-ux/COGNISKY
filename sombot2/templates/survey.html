@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COGNISKY - Cognitive Survey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #f0fdf4; font-family: sans-serif; }
+    .calm-gradient {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(236,253,245,0.8), rgba(219,234,254,0.8));
+      z-index: -1;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.8); backdrop-filter: blur(20px);
+      border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .likert-group input[type="radio"] {
+      appearance: none; width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #94a3b8; outline: none; cursor: pointer; transition: all 0.2s;
+    }
+    .likert-group input[type="radio"]:checked {
+      border-color: #0ea5e9; background-color: #0ea5e9; box-shadow: 0 0 0 4px rgba(14,165,233,0.2);
+    }
+    .likert-group label {
+      cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-top: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-gray-800 pb-16">
+  <div class="calm-gradient"></div>
+
+  <header class="bg-white/70 backdrop-blur-md shadow px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+    <h1 class="text-2xl font-bold text-blue-700 tracking-wide">🧠 COGNISKY Cognitive Survey</h1>
+    <a href="/dashboard" class="px-5 py-2 bg-gray-200 text-teal-800 font-semibold rounded-xl shadow hover:bg-gray-300 transition">Back to Hub</a>
+  </header>
+
+  <main class="max-w-3xl mx-auto py-10 px-6">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-extrabold text-blue-900 mb-3">Comprehensive Cognitive Assessment</h2>
+      <p class="text-gray-600">Please read each statement carefully and select how intensely you agree or disagree (1 = Strongly Disagree, 5 = Strongly Agree). Consistency is key.</p>
+    </div>
+
+    <form method="POST" action="/submit_survey" class="space-y-12">
+      
+      <!-- Section 1: Problem Solving -->
+      <section>
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center mb-1">
+            <span class="mr-2">🔵</span> SECTION 1: Problem-Solving Ability
+          </h3>
+          <p class="text-gray-500 text-sm italic ml-8">Measures logic, creativity, adaptability, and reflection.</p>
+        </div>
+        <div class="space-y-4">
+          {% set ps_questions = [
+            "I can break down complex problems into smaller steps.",
+            "I try different strategies if my first approach fails.",
+            "I remain calm under pressure while solving problems.",
+            "I learn from past mistakes to improve future decisions.",
+            "I can identify the root cause of a problem quickly.",
+            "I enjoy solving challenging problems.",
+            "I can think of creative solutions when standard methods fail.",
+            "I evaluate the effectiveness of my solution after solving a problem.",
+            "I give up quickly when faced with difficult problems."
+          ] %}
+          {% for i in range(9) %}
+            <div class="glass-card p-5">
+              <p class="text-base font-semibold text-gray-800 mb-3">{{ i+1 }}. {{ ps_questions[i] }}</p>
+              <div class="flex justify-between items-center likert-group max-w-lg mx-auto px-2">
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Disagree</span>
+                {% for val in range(1, 6) %}
+                  <div class="flex flex-col items-center">
+                    <input type="radio" name="ps_{{ i+1 }}" value="{{ val }}" required id="ps_{{i+1}}_{{val}}">
+                    <label for="ps_{{i+1}}_{{val}}">{{ val }}</label>
+                  </div>
+                {% endfor %}
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Agree</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Section 2: Numerical Skills -->
+      <section>
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center mb-1">
+            <span class="mr-2">🟣</span> SECTION 2: Numerical Skills
+          </h3>
+          <p class="text-gray-500 text-sm italic ml-8">Measures mathematical accuracy, confidence, and data interpretation.</p>
+        </div>
+        <div class="space-y-4">
+          {% set num_questions = [
+            "I am comfortable working with numbers in daily life.",
+            "I can perform basic calculations mentally.",
+            "I can quickly identify numerical patterns.",
+            "I understand charts, graphs, and tables easily.",
+            "I can estimate values accurately without exact calculation.",
+            "I feel confident solving mathematical problems.",
+            "I can interpret percentages, ratios, and probabilities.",
+            "I double-check my calculations for accuracy.",
+            "I feel anxious and confused when dealing with numbers or calculations."
+          ] %}
+          {% for i in range(9) %}
+            <div class="glass-card p-5">
+              <p class="text-base font-semibold text-gray-800 mb-3">{{ i+1 }}. {{ num_questions[i] }}</p>
+              <div class="flex justify-between items-center likert-group max-w-lg mx-auto px-2">
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Disagree</span>
+                {% for val in range(1, 6) %}
+                  <div class="flex flex-col items-center">
+                    <input type="radio" name="num_{{ i+1 }}" value="{{ val }}" required id="num_{{i+1}}_{{val}}">
+                    <label for="num_{{i+1}}_{{val}}">{{ val }}</label>
+                  </div>
+                {% endfor %}
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Agree</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Section 3: Emotional Intelligence -->
+      <section>
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center mb-1">
+            <span class="mr-2">🟢</span> SECTION 3: Emotional Intelligence
+          </h3>
+          <p class="text-gray-500 text-sm italic ml-8">Measures emotional regulation, empathy, and resilience.</p>
+        </div>
+        <div class="space-y-4">
+          {% set ei_questions = [
+            "I recognize my emotions as they occur.",
+            "I understand others’ emotions easily.",
+            "I control my emotions during stressful situations.",
+            "I stay calm during conflicts.",
+            "I can express my emotions clearly and appropriately.",
+            "I empathize with others’ problems.",
+            "I recover quickly from emotional setbacks.",
+            "I adapt my behavior based on others’ emotions.",
+            "I often let my emotions dictate my actions impulsively."
+          ] %}
+          {% for i in range(9) %}
+            <div class="glass-card p-5">
+              <p class="text-base font-semibold text-gray-800 mb-3">{{ i+1 }}. {{ ei_questions[i] }}</p>
+              <div class="flex justify-between items-center likert-group max-w-lg mx-auto px-2">
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Disagree</span>
+                {% for val in range(1, 6) %}
+                  <div class="flex flex-col items-center">
+                    <input type="radio" name="ei_{{ i+1 }}" value="{{ val }}" required id="ei_{{i+1}}_{{val}}">
+                    <label for="ei_{{i+1}}_{{val}}">{{ val }}</label>
+                  </div>
+                {% endfor %}
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Agree</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Section 4: Hypothesis Formation -->
+      <section>
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center mb-1">
+            <span class="mr-2">🟡</span> SECTION 4: Hypothesis Formation
+          </h3>
+          <p class="text-gray-500 text-sm italic ml-8">Measures critical reasoning, cognitive flexibility, and evidence-based thinking.</p>
+        </div>
+        <div class="space-y-4">
+          {% set hyp_questions = [
+            "I make logical assumptions based on available data.",
+            "I consider multiple possibilities before deciding.",
+            "I question information instead of accepting it blindly.",
+            "I predict outcomes of situations effectively.",
+            "I analyze both pros and cons before making decisions.",
+            "I validate my assumptions with evidence.",
+            "I identify hidden patterns in information.",
+            "I revise my thinking when new information is available.",
+            "I usually go with my first instinct rather than analyzing other possibilities."
+          ] %}
+          {% for i in range(9) %}
+            <div class="glass-card p-5">
+              <p class="text-base font-semibold text-gray-800 mb-3">{{ i+1 }}. {{ hyp_questions[i] }}</p>
+              <div class="flex justify-between items-center likert-group max-w-lg mx-auto px-2">
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Disagree</span>
+                {% for val in range(1, 6) %}
+                  <div class="flex flex-col items-center">
+                    <input type="radio" name="hyp_{{ i+1 }}" value="{{ val }}" required id="hyp_{{i+1}}_{{val}}">
+                    <label for="hyp_{{i+1}}_{{val}}">{{ val }}</label>
+                  </div>
+                {% endfor %}
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Agree</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Section 5: Memory Retention -->
+      <section>
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center mb-1">
+            <span class="mr-2">🔴</span> SECTION 5: Memory Retention
+          </h3>
+          <p class="text-gray-500 text-sm italic ml-8">Measures recall speed, retention strength, and association ability.</p>
+        </div>
+        <div class="space-y-4">
+          {% set mem_questions = [
+            "I remember information for long periods after learning.",
+            "I recall past experiences easily.",
+            "I use memory techniques (visualization, repetition, etc.).",
+            "I quickly recall learned concepts when needed.",
+            "I remember details like names, dates, or facts.",
+            "I can retain information even after distractions.",
+            "I connect new information with what I already know.",
+            "I can recall information in the correct sequence/order.",
+            "I frequently forget important details shortly after learning them."
+          ] %}
+          {% for i in range(9) %}
+            <div class="glass-card p-5">
+              <p class="text-base font-semibold text-gray-800 mb-3">{{ i+1 }}. {{ mem_questions[i] }}</p>
+              <div class="flex justify-between items-center likert-group max-w-lg mx-auto px-2">
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Disagree</span>
+                {% for val in range(1, 6) %}
+                  <div class="flex flex-col items-center">
+                    <input type="radio" name="mem_{{ i+1 }}" value="{{ val }}" required id="mem_{{i+1}}_{{val}}">
+                    <label for="mem_{{i+1}}_{{val}}">{{ val }}</label>
+                  </div>
+                {% endfor %}
+                <span class="text-[10px] uppercase text-gray-400 font-bold w-12 text-center leading-tight">Strongly Agree</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <div class="text-center mt-12">
+        <button type="submit" class="px-10 py-5 bg-blue-600 text-white font-extrabold text-xl rounded-full shadow-2xl hover:bg-blue-700 hover:shadow-blue-500/50 transition transform hover:-translate-y-2">
+          Submit Advanced Assessment
+        </button>
+      </div>
+
+    </form>
+  </main>
+</body>
+</html>

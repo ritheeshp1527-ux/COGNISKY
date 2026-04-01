@@ -96,13 +96,16 @@ button {
   <div class="w-[70%] flex flex-col h-[90vh] bg-white/50 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden z-10 relative">
     <header class="bg-white/70 backdrop-blur-md shadow px-6 py-4 flex items-center justify-between sticky top-0 z-10">
       <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 COGNISKY</h1>
-      <div class="flex space-x-3">
-        <button id="analyseBtn" class="px-4 py-2 bg-teal-500 text-white rounded-xl shadow hover:bg-teal-600 transition">
+      <div class="flex space-x-2">
+        <button id="analyseBtn" class="px-3 py-2 bg-teal-500 text-white rounded-lg shadow hover:bg-teal-600 transition font-medium">
           Analyse
         </button>
-        <button id="resetBtn" class="px-4 py-2 bg-rose-400 text-white rounded-xl shadow hover:bg-rose-500 transition">
+        <button id="resetBtn" class="px-3 py-2 bg-rose-400 text-white rounded-lg shadow hover:bg-rose-500 transition font-medium">
           Reset
         </button>
+        <a href="/dashboard" class="px-3 py-2 bg-gray-200 text-teal-800 rounded-lg shadow hover:bg-gray-300 transition font-medium border border-teal-200">
+          Dashboard
+        </a>
       </div>
     </header>
 
@@ -165,15 +168,118 @@ button {
     sendBtn.onclick = sendMessage;
     userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
 
+    function appendAnalysisCard(analysisObj) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "flex flex-col items-start fade-in mb-4 w-full";
+      
+      const label = document.createElement("div");
+      label.className = "text-sm font-extrabold mb-1 tracking-wide text-emerald-800";
+      label.innerText = "📊 ANALYSIS:";
+
+      let limeHtml = "";
+      if (analysisObj.lime_error) {
+        limeHtml = `<p class="text-xs text-red-500 italic mt-2">${analysisObj.lime_error}</p>`;
+      } else if (analysisObj.lime_words && analysisObj.lime_words.length > 0) {
+        let pills = analysisObj.lime_words.map(w => {
+          let color = w.weight > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300";
+          return `<span class="inline-block px-2 py-1 text-xs font-bold border rounded-lg m-1 ${color}">${w.word} (${(w.weight > 0 ? '+' : '')}${w.weight.toFixed(2)})</span>`;
+        }).join('');
+        limeHtml = `<div class="mt-3 bg-gray-50 p-3 rounded-lg border text-sm"><p class="font-bold text-gray-700 mb-1">Keywords Extracted (LIME):</p><div class="flex flex-wrap">${pills}</div></div>`;
+      } else {
+        limeHtml = `<p class="text-xs text-gray-500 italic mt-2">No strong keywords found.</p>`;
+      }
+
+      const card = document.createElement("div");
+      card.className = "bg-white border-2 border-emerald-200 w-full max-w-md p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden";
+      card.innerHTML = `
+        <div class="absolute top-0 right-0 p-3 opacity-20 text-5xl">🧠</div>
+        <div>
+          <h4 class="text-xl font-black text-emerald-900 capitalize leading-tight">${analysisObj.mood}</h4>
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Detected Emotion</p>
+        </div>
+        
+        <div>
+          <div class="flex justify-between text-sm font-bold text-emerald-800 mb-1">
+            <span>Severity</span>
+            <span>${analysisObj.severity}/10</span>
+          </div>
+          <div class="w-full bg-emerald-100 rounded-full h-2.5">
+            <div class="bg-gradient-to-r from-emerald-400 to-teal-600 h-2.5 rounded-full" style="width: ${analysisObj.severity * 10}%"></div>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl shadow-inner text-sm border border-emerald-100">
+          <p class="font-bold mb-1">💡 Self-Care Suggestion</p>
+          <p>${analysisObj.suggestion}</p>
+        </div>
+
+        <div class="text-sm text-gray-700">
+          <p class="font-bold mb-1">🤔 Why?</p>
+          <p class="italic text-gray-600">${analysisObj.why}</p>
+        </div>
+        
+        ${limeHtml}
+      `;
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(card);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showLoading() {
+      const wrapper = document.createElement("div");
+      wrapper.id = "loading-indicator";
+      wrapper.className = "flex flex-col items-start fade-in mb-4 w-full";
+      wrapper.innerHTML = `
+        <div class="text-sm font-extrabold mb-1 tracking-wide text-emerald-800">📊 ANALYSIS:</div>
+        <div class="bg-white border-2 border-emerald-100 p-4 rounded-xl shadow-md flex items-center space-x-3 text-emerald-800">
+          <svg class="animate-spin h-5 w-5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="font-bold text-sm tracking-wide">Deep ML Analysis in progress...</span>
+        </div>
+      `;
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeLoading() {
+      const loading = document.getElementById("loading-indicator");
+      if (loading) loading.remove();
+    }
+
     analyseBtn.onclick = async () => {
-      const res = await fetch("/analyse", { method: "POST" });
-      const data = await res.json();
-      appendMessage(data.analysis, "analysis");
+      // Disable button and show loading State
+      analyseBtn.disabled = true;
+      analyseBtn.classList.add("opacity-50", "cursor-not-allowed");
+      showLoading();
+
+      try {
+        const res = await fetch("/analyse", { method: "POST" });
+        const data = await res.json();
+        
+        removeLoading();
+        
+        if (typeof data.analysis === 'string') {
+          appendMessage(data.analysis, "analysis");
+        } else {
+          appendAnalysisCard(data.analysis);
+        }
+      } catch (err) {
+        removeLoading();
+        appendMessage("An error occurred during analysis.", "analysis");
+      } finally {
+        // Re-enable button
+        analyseBtn.disabled = false;
+        analyseBtn.classList.remove("opacity-50", "cursor-not-allowed");
+      }
     };
 
     resetBtn.onclick = async () => {
       await fetch("/reset", { method: "POST" });
-      chatBox.innerHTML = "";
+      window.location.reload(); // Reload to create a new session
     };
   </script>
 </body>

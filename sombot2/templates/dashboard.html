@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COGNISKY - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #f0fdf4; font-family: sans-serif; }
+    .calm-gradient {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(236,253,245,0.8), rgba(219,234,254,0.8));
+      z-index: -1;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
+      border-radius: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .hover-grow { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .hover-grow:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body class="min-h-screen text-gray-800 pb-10">
+  <div class="calm-gradient"></div>
+
+  <header class="bg-white/70 backdrop-blur-md shadow px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+    <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 COGNISKY Hub</h1>
+    <div class="flex items-center space-x-4">
+      <span class="text-teal-800 font-medium">Hello, {{ current_user.username }}</span>
+      <a href="/logout" class="px-5 py-2 bg-rose-400 text-white rounded-xl shadow hover:bg-rose-500 transition">Logout</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto py-10 px-6">
+    
+    <!-- DUAL MODE GATEWAY -->
+    <h2 class="text-3xl font-extrabold text-teal-800 mb-6 text-center">How would you like to proceed today?</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Option A: Chatbot -->
+      <a href="/chat" class="glass-card p-10 flex flex-col items-center text-center hover-grow cursor-pointer text-decoration-none border-l-4 border-l-teal-400">
+        <div class="text-6xl mb-4">💬</div>
+        <h3 class="text-2xl font-bold text-teal-800 mb-2">Chat Companion</h3>
+        <p class="text-gray-600">A supportive, trauma-informed conversational companion that understands your current mood and offers self-care.</p>
+        <div class="mt-6 px-6 py-3 bg-teal-500 text-white rounded-full font-semibold">Start Chatting</div>
+      </a>
+      
+      <!-- Option B: Cognitive Survey -->
+      <a href="/survey" class="glass-card p-10 flex flex-col items-center text-center hover-grow cursor-pointer border-l-4 border-l-blue-400">
+        <div class="text-6xl mb-4">🧠</div>
+        <h3 class="text-2xl font-bold text-blue-800 mb-2">Cognitive Survey</h3>
+        <p class="text-gray-600">Take our standardized 20-question cognitive assessment to measure key mental parameters and receive a detailed profile.</p>
+        <div class="mt-6 px-6 py-3 bg-blue-500 text-white rounded-full font-semibold">Take Survey</div>
+      </a>
+    </div>
+
+    <!-- HISTORY TABS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      
+      <!-- Survey History -->
+      <div>
+        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center">
+          <span class="mr-2">📊</span> Past Cognitive Profiles
+        </h2>
+        {% if not surveys %}
+          <div class="glass-card p-6 text-center text-gray-500 text-sm">No cognitive surveys taken yet.</div>
+        {% else %}
+          <div class="space-y-4">
+            {% for survey in surveys %}
+              <div class="glass-card p-5 hover-grow">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-xs text-gray-400 font-semibold uppercase">{{ survey.date_taken.strftime('%b %d, %Y') }}</span>
+                  <a href="/survey_result/{{ survey.id }}" class="text-blue-600 text-sm font-semibold hover:underline">View Details &rarr;</a>
+                </div>
+                <div class="flex justify-between items-end">
+                  <div>
+                    <span class="text-sm text-gray-500">Total Score:</span>
+                    <span class="text-xl font-bold text-blue-700 ml-1">{{ "%.2f"|format(survey.total_score) }}/5</span>
+                  </div>
+                  <div class="px-3 py-1 rounded-full text-xs font-bold {% if survey.category == 'High' %}bg-green-100 text-green-700{% elif survey.category == 'Medium' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">
+                    {{ survey.category }} Intelligence
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Chat History -->
+      <div>
+        <h2 class="text-2xl font-bold text-teal-800 mb-6 flex items-center">
+          <span class="mr-2">🌿</span> Past Chat Sessions
+        </h2>
+        {% if not sessions %}
+          <div class="glass-card p-6 text-center text-gray-500 text-sm">No conversations yet.</div>
+        {% else %}
+          <div class="space-y-4">
+            {% for session in sessions %}
+              <div class="glass-card p-5 hover-grow">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                  {{ session.date_created.strftime('%b %d, %Y • %I:%M %p') }}
+                </p>
+                {% if session.mood %}
+                  <p class="text-lg font-bold text-teal-700 capitalize">{{ session.mood }}</p>
+                  <div class="flex items-center space-x-2 mt-2">
+                    <span class="text-xs font-medium text-gray-500">Severity:</span>
+                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                      <div class="bg-teal-500 h-2 rounded-full" style="width: {{ session.severity * 10 }}%"></div>
+                    </div>
+                    <span class="text-xs font-bold text-teal-800">{{ session.severity }}/10</span>
+                  </div>
+                {% else %}
+                  <p class="text-gray-500 text-sm italic">No analysis triggered for this session.</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      
+    </div>
+  </main>
+</body>
+</html>
