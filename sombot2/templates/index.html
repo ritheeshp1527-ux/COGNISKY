@@ -3,46 +3,20 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>COGNISKY - Calm Mode</title>
+  <title>COGNISKY - Chat Companion</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* ===== Animated Background Gradient + Stone Image ===== */
-    @keyframes calmShift {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
     body {
-      margin: 0;
+      background-color: #FFF7ED;
+      color: #2F3E46;
       font-family: sans-serif;
+      margin: 0;
       overflow: hidden;
     }
 
-    .calm-gradient {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        linear-gradient(270deg, rgba(147, 197, 253, 0.4), rgba(167, 243, 208, 0.4), rgba(196, 181, 253, 0.4), rgba(251, 207, 232, 0.4)),
-        url('https://png.pngtree.com/background/20250111/original/pngtree-nice-background-beautiful-h5-wallpaper-imag-picture-image_15708053.jpg') center/cover no-repeat;
-      background-blend-mode: lighten;
-      /* blends image subtly */
-      background-size: cover;
-      animation: calmShift 30s ease infinite;
-      z-index: -1;
+    .fade-in {
+      animation: fadeIn 0.8s ease-out forwards;
     }
-
 
     @keyframes fadeIn {
       from {
@@ -56,105 +30,91 @@
       }
     }
 
-    .fade-in {
-      animation: fadeIn 0.8s ease-out forwards;
-    }
-
-    /* ===== Button Transitions & Hover Effects ===== */
     button {
       transition: all 0.3s ease-in-out;
     }
 
-    #sendBtn,
-    #analyseBtn,
-    #resetBtn {
-      position: relative;
-      overflow: hidden;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.4s ease;
+    .soft-box {
+      background: #FDEDDC;
+      border: 1px solid rgba(47, 62, 70, 0.05);
+      border-radius: 2rem;
+      box-shadow: 0 10px 40px rgba(47, 62, 70, 0.04);
     }
 
-    #sendBtn:hover,
-    #analyseBtn:hover,
-    #resetBtn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
     }
 
-    #sendBtn:active,
-    #analyseBtn:active,
-    #resetBtn:active {
-      transform: scale(0.97);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 10px;
     }
 
-    /* Optional: Fancy gradient shimmer on Analyse button */
-    #analyseBtn::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 20%, transparent 70%);
-      transform: rotate(25deg);
-      transition: opacity 0.6s ease;
-      opacity: 0;
-      z-index: 0;
+    ::-webkit-scrollbar-thumb {
+      background: rgba(47, 62, 70, 0.1);
+      border-radius: 10px;
     }
 
-    #analyseBtn:hover::before {
-      opacity: 1;
-      animation: shimmer 2s infinite linear;
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(47, 62, 70, 0.2);
     }
 
-    @keyframes shimmer {
-      0% {
-        transform: translate(-50%, -50%) rotate(25deg);
-      }
+    .btn-action {
+      background: white;
+      color: #84A98C;
+      border: 1px solid rgba(132, 169, 140, 0.3);
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.875rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    }
 
-      100% {
-        transform: translate(150%, 150%) rotate(25deg);
-      }
+    .btn-action:hover {
+      background: #fdfdfd;
+      border-color: #84A98C;
     }
   </style>
 </head>
 
-<body class="flex justify-center items-center min-h-screen text-gray-800">
-
-  <!-- Background -->
-  <div class="calm-gradient"></div>
+<body class="flex justify-center items-center h-screen">
 
   <div
-    class="w-[70%] flex flex-col h-[90vh] bg-white/50 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden z-10 relative">
-    <header class="bg-white/70 backdrop-blur-md shadow px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-      <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 COGNISKY</h1>
-      <div class="flex space-x-2">
-        <button id="analyseBtn"
-          class="px-3 py-2 bg-teal-500 text-white rounded-lg shadow hover:bg-teal-600 transition font-medium">
-          Analyse
+    class="w-[90%] md:w-[75%] max-w-5xl flex flex-col h-[92vh] soft-box overflow-hidden z-10 relative animate-[fadeInUp_0.8s_ease-out]">
+
+    <header class="bg-[#FFF7ED] px-8 py-5 flex items-center justify-between border-b border-[#2F3E46]/5 shadow-sm">
+      <h1 class="text-2xl font-bold text-[#84A98C] tracking-wide">
+        COGNISKY Safe Space
+      </h1>
+      <div class="flex space-x-3">
+        <button id="analyseBtn" class="btn-action">
+          Reflect on Dialogue
         </button>
         <button id="resetBtn"
-          class="px-3 py-2 bg-rose-400 text-white rounded-lg shadow hover:bg-rose-500 transition font-medium">
-          Reset
+          class="bg-white text-[#E5989B] border border-[#E5989B]/30 px-5 py-2 rounded-xl font-bold text-sm shadow-sm hover:border-[#E5989B] transition">
+          Start Fresh
         </button>
         <a href="/dashboard"
-          class="px-3 py-2 bg-gray-200 text-teal-800 rounded-lg shadow hover:bg-gray-300 transition font-medium border border-teal-200">
-          Dashboard
+          class="bg-[#84A98C] text-white px-5 py-2 rounded-xl font-bold text-sm shadow-sm hover:bg-[#6b8e73] transition flex items-center">
+          Exit Room
         </a>
       </div>
     </header>
 
-    <main id="chat-box" class="flex-1 overflow-y-auto px-6 py-6 space-y-4"></main>
+    <main id="chat-box" class="flex-1 overflow-y-auto px-8 py-8 space-y-6"></main>
 
-    <div class="bg-white/70 backdrop-blur-md p-4 border-t flex items-center space-x-3 shadow-inner">
-      <input id="user-input" type="text" placeholder="Type your message calmly..."
-        class="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-sm" />
+    <div
+      class="bg-[#FFF7ED] p-5 border-t border-[#2F3E46]/5 flex items-center space-x-4 shadow-[0_-4px_15px_rgba(0,0,0,0.02)]">
+      <input id="user-input" type="text" placeholder="Share what's on your mind..." autocomplete="off"
+        class="flex-1 px-6 py-4 bg-white border border-[#2F3E46]/10 rounded-2xl focus:outline-none focus:border-[#84A98C] text-[#2F3E46] placeholder-[#2F3E46]/40 font-medium shadow-sm transition" />
+
       <button id="sendBtn"
-        class="px-5 py-2 bg-teal-500 text-white font-medium rounded-xl shadow hover:bg-teal-600 transition">
-        Send
+        class="p-4 bg-[#84A98C] text-white rounded-2xl shadow-sm hover:bg-[#6b8e73] hover:-translate-y-1 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform rotate-90" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
       </button>
     </div>
   </div>
@@ -168,24 +128,32 @@
 
     function appendMessage(text, from) {
       const wrapper = document.createElement("div");
-      wrapper.className = "flex flex-col " + (from === "user" ? "items-end" : "items-start") + " fade-in";
+      wrapper.className = "flex w-full " + (from === "user" ? "justify-end" : "justify-start") + " fade-in";
+
+      const content = document.createElement("div");
+      content.className = "max-w-[75%] space-y-1";
 
       const label = document.createElement("div");
-      label.className = "text-sm font-extrabold mb-1 tracking-wide " +
-        (from === "user" ? "text-blue-800" : from === "bot" ? "text-teal-800" : "text-emerald-800");
-      label.innerText = from === "user" ? "YOU:" : from === "bot" ? "COGNISKY:" : "📊 ANALYSIS:";
+      label.className = "text-xs font-bold uppercase " +
+        (from === "user" ? "text-[#84A98C] text-right pr-2" : from === "bot" ? "text-[#F4A261] pl-2" : "text-[#E5989B] pl-2");
+      label.innerText = from === "user" ? "You" : from === "bot" ? "Companion" : "Analysis";
 
       const bubble = document.createElement("div");
       bubble.className = (from === "user"
-        ? "bg-blue-100 text-blue-900"
+        ? "bg-[#84A98C] text-white"
         : from === "bot"
-          ? "bg-teal-100 text-teal-900"
-          : "bg-emerald-100 text-emerald-900") +
-        " px-4 py-2 rounded-2xl shadow-lg max-w-md whitespace-pre-wrap";
+          ? "bg-white text-[#2F3E46] border border-[#2F3E46]/5"
+          : "bg-white border-l-4 border-[#F4A261] text-[#2F3E46]") +
+        " px-6 py-4 rounded-3xl shadow-sm whitespace-pre-wrap font-medium leading-relaxed text-sm lg:text-base";
+
+      if (from === "user") bubble.classList.add("rounded-br-sm");
+      else bubble.classList.add("rounded-bl-sm");
+
       bubble.innerText = text;
 
-      wrapper.appendChild(label);
-      wrapper.appendChild(bubble);
+      content.appendChild(label);
+      content.appendChild(bubble);
+      wrapper.appendChild(content);
       chatBox.appendChild(wrapper);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -195,6 +163,7 @@
       if (!msg) return;
       appendMessage(msg, "user");
       userInput.value = "";
+
       const res = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -209,59 +178,62 @@
 
     function appendAnalysisCard(analysisObj) {
       const wrapper = document.createElement("div");
-      wrapper.className = "flex flex-col items-start fade-in mb-4 w-full";
-
-      const label = document.createElement("div");
-      label.className = "text-sm font-extrabold mb-1 tracking-wide text-emerald-800";
-      label.innerText = "📊 ANALYSIS:";
+      wrapper.className = "flex w-full justify-start fade-in mt-4";
 
       let limeHtml = "";
       if (analysisObj.lime_error) {
-        limeHtml = `<p class="text-xs text-red-500 italic mt-2">${analysisObj.lime_error}</p>`;
+        limeHtml = `<p class="text-xs text-[#E5989B] italic mt-3">${analysisObj.lime_error}</p>`;
       } else if (analysisObj.lime_words && analysisObj.lime_words.length > 0) {
         let pills = analysisObj.lime_words.map(w => {
-          let color = w.weight > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300";
-          return `<span class="inline-block px-2 py-1 text-xs font-bold border rounded-lg m-1 ${color}">${w.word} (${(w.weight > 0 ? '+' : '')}${w.weight.toFixed(2)})</span>`;
+          let isPositive = w.weight > 0;
+          let colorClass = isPositive ? "bg-[#84A98C]/10 text-[#84A98C] border-[#84A98C]/30" : "bg-[#E5989B]/10 text-[#E5989B] border-[#E5989B]/30";
+          return `<span class="inline-block px-3 py-1 text-xs font-bold border rounded-full m-1 ${colorClass}">${w.word} (${(isPositive ? '+' : '')}${w.weight.toFixed(2)})</span>`;
         }).join('');
-        limeHtml = `<div class="mt-3 bg-gray-50 p-3 rounded-lg border text-sm"><p class="font-bold text-gray-700 mb-1">Keywords Extracted (LIME):</p><div class="flex flex-wrap">${pills}</div></div>`;
-      } else {
-        limeHtml = `<p class="text-xs text-gray-500 italic mt-2">No strong keywords found.</p>`;
+        limeHtml = `<div class="mt-5 pt-5 border-t border-[#2F3E46]/5"><p class="font-bold text-[#2F3E46]/50 text-xs uppercase mb-3">Linguistic Roots:</p><div class="flex flex-wrap">${pills}</div></div>`;
       }
 
       const card = document.createElement("div");
-      card.className = "bg-white border-2 border-emerald-200 w-full max-w-md p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden";
+      card.className = "bg-white border border-[#2F3E46]/5 w-full max-w-xl p-8 rounded-[2rem] rounded-bl-sm shadow-sm space-y-6";
       card.innerHTML = `
-        <div class="absolute top-0 right-0 p-3 opacity-20 text-5xl">🧠</div>
         <div>
-          <h4 class="text-xl font-black text-emerald-900 capitalize leading-tight">${analysisObj.mood}</h4>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Detected Emotion</p>
+          <h4 class="text-3xl font-bold text-[#F4A261] capitalize leading-none mb-1">${analysisObj.mood}</h4>
+          <p class="text-xs font-bold text-[#2F3E46]/50 uppercase tracking-widest">Detected Emotional State</p>
         </div>
         
-        <div>
-          <div class="flex justify-between text-sm font-bold text-emerald-800 mb-1">
-            <span>Severity</span>
-            <span>${analysisObj.severity}/10</span>
+        <div class="bg-[#FFF7ED] p-4 rounded-xl border border-[#2F3E46]/5">
+          <div class="flex justify-between text-xs font-bold text-[#2F3E46]/60 uppercase tracking-widest mb-3">
+            <span>Intensity</span>
+            <span class="text-[#84A98C]">${analysisObj.severity} / 10</span>
           </div>
-          <div class="w-full bg-emerald-100 rounded-full h-2.5">
-            <div class="bg-gradient-to-r from-emerald-400 to-teal-600 h-2.5 rounded-full" style="width: ${analysisObj.severity * 10}%"></div>
+          <div class="w-full bg-white rounded-full h-2 overflow-hidden shadow-inner">
+            <div class="bg-[#84A98C] h-2 rounded-full transition-all" style="width: ${analysisObj.severity * 10}%"></div>
           </div>
         </div>
 
-        <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl shadow-inner text-sm border border-emerald-100">
-          <p class="font-bold mb-1">💡 Self-Care Suggestion</p>
-          <p>${analysisObj.suggestion}</p>
+        <div class="bg-[#84A98C]/10 text-[#2F3E46] p-5 rounded-xl border border-[#84A98C]/20">
+          <p class="font-bold text-sm uppercase tracking-widest text-[#84A98C] mb-2">Gentle Suggestion</p>
+          <p class="font-medium leading-relaxed">${analysisObj.suggestion}</p>
         </div>
 
-        <div class="text-sm text-gray-700">
-          <p class="font-bold mb-1">🤔 Why?</p>
-          <p class="italic text-gray-600">${analysisObj.why}</p>
+        <div class="text-sm">
+          <p class="font-bold text-xs uppercase tracking-widest text-[#2F3E46]/50 mb-2">Reflection</p>
+          <p class="text-[#2F3E46]/80 leading-relaxed font-medium">${analysisObj.why}</p>
         </div>
         
         ${limeHtml}
       `;
 
-      wrapper.appendChild(label);
-      wrapper.appendChild(card);
+      const content = document.createElement("div");
+      content.className = "max-w-[85%] space-y-1";
+
+      const label = document.createElement("div");
+      label.className = "text-xs font-bold uppercase text-[#E5989B] pl-2";
+      label.innerText = "System Insight";
+
+      content.appendChild(label);
+      content.appendChild(card);
+      wrapper.appendChild(content);
+
       chatBox.appendChild(wrapper);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -269,15 +241,17 @@
     function showLoading() {
       const wrapper = document.createElement("div");
       wrapper.id = "loading-indicator";
-      wrapper.className = "flex flex-col items-start fade-in mb-4 w-full";
+      wrapper.className = "flex w-full justify-start fade-in";
       wrapper.innerHTML = `
-        <div class="text-sm font-extrabold mb-1 tracking-wide text-emerald-800">📊 ANALYSIS:</div>
-        <div class="bg-white border-2 border-emerald-100 p-4 rounded-xl shadow-md flex items-center space-x-3 text-emerald-800">
-          <svg class="animate-spin h-5 w-5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span class="font-bold text-sm tracking-wide">Deep ML Analysis in progress...</span>
+        <div class="max-w-[75%] space-y-1">
+          <div class="text-xs font-bold uppercase text-[#84A98C] pl-2">System</div>
+          <div class="bg-white border border-[#2F3E46]/5 text-[#2F3E46]/70 px-6 py-4 rounded-3xl rounded-bl-sm shadow-sm flex items-center space-x-3">
+            <svg class="animate-spin h-5 w-5 text-[#84A98C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="font-bold text-sm">Reflecting on dialogue...</span>
+          </div>
         </div>
       `;
       chatBox.appendChild(wrapper);
@@ -290,7 +264,6 @@
     }
 
     analyseBtn.onclick = async () => {
-      // Disable button and show loading State
       analyseBtn.disabled = true;
       analyseBtn.classList.add("opacity-50", "cursor-not-allowed");
       showLoading();
@@ -298,19 +271,17 @@
       try {
         const res = await fetch("/analyse", { method: "POST" });
         const data = await res.json();
-
         removeLoading();
 
         if (typeof data.analysis === 'string') {
-          appendMessage(data.analysis, "analysis");
+          appendMessage(data.analysis, "bot");
         } else {
           appendAnalysisCard(data.analysis);
         }
       } catch (err) {
         removeLoading();
-        appendMessage("An error occurred during analysis.", "analysis");
+        appendMessage("Reflection process was interrupted.", "bot");
       } finally {
-        // Re-enable button
         analyseBtn.disabled = false;
         analyseBtn.classList.remove("opacity-50", "cursor-not-allowed");
       }
@@ -318,9 +289,25 @@
 
     resetBtn.onclick = async () => {
       await fetch("/reset", { method: "POST" });
-      window.location.reload(); // Reload to create a new session
+      window.location.reload();
     };
+
+    userInput.focus();
   </script>
+
+  <style>
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </body>
 
 </html>

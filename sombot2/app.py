@@ -1,5 +1,7 @@
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash, current_app
 import os
+import tempfile
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from transformers import pipeline
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -14,7 +16,7 @@ import json
 import re
 
 # ---------------- Env / Keys ----------------
-load_dotenv()
+load_dotenv(override=True)
 API_KEY = os.getenv("GOOGLE_API_KEY")
 if not API_KEY:
     raise ValueError("GOOGLE_API_KEY not set in .env")
@@ -22,8 +24,11 @@ if not API_KEY:
 # ---------------- Flask ----------------
 app = Flask(__name__, template_folder="templates")
 app.config['SECRET_KEY'] = 'some_secure_secret_cognisky'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cognisky.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cognisky_v2.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+os.makedirs('uploads', exist_ok=True)
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -63,6 +68,8 @@ class CognitiveSurveyResult(db.Model):
     memory = db.Column(db.Float, nullable=False)
     total_score = db.Column(db.Float, nullable=False)
     category = db.Column(db.String(20), nullable=False)
+    video_analysis_feedback = db.Column(db.Text, nullable=True)
+    video_analysis_score = db.Column(db.String(50), nullable=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -201,9 +208,53 @@ def survey():
 @app.route("/submit_survey", methods=["POST"])
 @login_required
 def submit_survey():
-    # Helper to calculate average directly from the raw form since User wants (sum/20)*5 mapping.
-    # Actually, the user mapping: "Section Score = Sum of 4 questions. Normalized Score = (Score / 20) * 5".
-    # Since questions are on Likert Scale (1..5), 4 questions max sum = 20. Thus (sum/20)*5 is simply the average of the 4 questions.
+    # Process potential video file
+    video_feedback_text = None
+    video_stress_score = None
+
+    if 'video' in request.files:
+        video_file = request.files['video']
+        if video_file.filename != '':
+            video_filename = secure_filename(video_file.filename)
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
+            video_file.save(video_path)
+            
+            try:
+                # Upload and process via Gemini 2.5 Flash
+                uploaded_file = genai.upload_file(path=video_path)
+                
+                import time
+                while uploaded_file.state.name == 'PROCESSING':
+                    time.sleep(2)
+                    uploaded_file = genai.get_file(uploaded_file.name)
+                
+                if uploaded_file.state.name == 'FAILED':
+                    raise Exception("Video processing failed in Gemini backend.")
+
+                prompt = """You are an expert cognitive psychologist. Watch this video of a user taking a comprehensive logical and mathematical survey.
+Analyze their facial expressions, eye movements, hesitation, pacing, and verbal mutterings.
+Provide a strictly JSON response with these keys: 
+"stress_level" (Low/Medium/High), 
+"focus_level" (Low/Medium/High), 
+"observations" (a brief paragraph explaining what you see)."""
+                
+                response = gemini.generate_content([prompt, uploaded_file])
+                raw_text = response.text.strip()
+                if raw_text.startswith("```json"):
+                    raw_text = raw_text[7:-3].strip()
+                elif raw_text.startswith("```"):
+                    raw_text = raw_text[3:-3].strip()
+                    
+                parsed_json = json.loads(raw_text)
+                video_stress_score = parsed_json.get("stress_level", "Unknown")
+                video_feedback_text = f"Focus: {parsed_json.get('focus_level', 'Unknown')} | Observations: {parsed_json.get('observations', 'No observations.')}"
+                genai.delete_file(uploaded_file.name)
+            except Exception as e:
+                video_feedback_text = f"Video analysis failed: {str(e)}"
+            finally:
+                if os.path.exists(video_path):
+                    os.remove(video_path)
+
     def compute_category(avg):
         if avg < 2: return "Low"
         elif 2 <= avg <= 3.5: return "Medium"
@@ -211,7 +262,6 @@ def submit_survey():
         
     def calc_score(prefix, num_normal, num_reverse_idx):
         score = sum(int(request.form.get(f"{prefix}_{i}", 3)) for i in range(1, num_normal + 1))
-        # Reverse scaling for the final trigger question
         score += (6 - int(request.form.get(f"{prefix}_{num_reverse_idx}", 3)))
         return score / float(num_normal + 1)
     
@@ -232,7 +282,9 @@ def submit_survey():
         hypothesis=hyp,
         memory=mem,
         total_score=total,
-        category=cat
+        category=cat,
+        video_analysis_feedback=video_feedback_text,
+        video_analysis_score=video_stress_score
     )
     db.session.add(result)
     db.session.commit()

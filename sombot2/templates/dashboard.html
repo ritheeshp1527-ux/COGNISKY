@@ -1,124 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>COGNISKY - Dashboard</title>
+  <title>COGNISKY - Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background-color: #f0fdf4; font-family: sans-serif; }
-    .calm-gradient {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, rgba(236,253,245,0.8), rgba(219,234,254,0.8));
-      z-index: -1;
+    body {
+      background-color: #FFF7ED;
+      color: #2F3E46;
+      font-family: sans-serif;
+      margin: 0;
+      overflow-x: hidden;
     }
-    .glass-card {
-      background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
-      border-radius: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.4);
+
+    .soft-card {
+      background: #FDEDDC;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(47, 62, 70, 0.04);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .hover-grow { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .hover-grow:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+
+    .soft-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(47, 62, 70, 0.08);
+    }
+
+    .btn-primary {
+      background-color: #84A98C;
+      color: white;
+      transition: background-color 0.3s ease;
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: #6a8b71;
+    }
+
+    .btn-outline {
+      border: 2px solid #84A98C;
+      color: #84A98C;
+      background: transparent;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .btn-outline:hover {
+      background-color: #f1faf3;
+      color: #6a8b71;
+      border-color: #6a8b71;
+    }
+
+    header {
+      background-color: #FFF7ED;
+      border-bottom: 1px solid rgba(47, 62, 70, 0.05);
+    }
+
+    .text-accent-orange {
+      color: #F4A261;
+    }
+
+    .bg-accent-orange {
+      background-color: #F4A261;
+    }
+
+    .text-accent-pink {
+      color: #E5989B;
+    }
+
+    .bg-accent-pink {
+      background-color: #E5989B;
+    }
   </style>
 </head>
-<body class="min-h-screen text-gray-800 pb-10">
-  <div class="calm-gradient"></div>
 
-  <header class="bg-white/70 backdrop-blur-md shadow px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-    <h1 class="text-2xl font-bold text-teal-700 tracking-wide">🌿 COGNISKY Hub</h1>
-    <div class="flex items-center space-x-4">
-      <span class="text-teal-800 font-medium">Hello, {{ current_user.username }}</span>
-      <a href="/logout" class="px-5 py-2 bg-rose-400 text-white rounded-xl shadow hover:bg-rose-500 transition">Logout</a>
+<body class="min-h-screen pb-16">
+
+  <header class="shadow-sm px-8 py-5 flex items-center justify-between sticky top-0 z-20">
+    <h1 class="text-2xl font-bold text-[#84A98C] tracking-wide">COGNISKY</h1>
+    <div class="flex items-center space-x-6">
+      <span class="text-[#2F3E46] opacity-80 font-medium">Hello, <span class="font-bold opacity-100">{{
+          current_user.username }}</span></span>
+      <a href="/logout" class="btn-outline">Logout</a>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto py-10 px-6">
-    
-    <!-- DUAL MODE GATEWAY -->
-    <h2 class="text-3xl font-extrabold text-teal-800 mb-6 text-center">How would you like to proceed today?</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-      <!-- Option A: Chatbot -->
-      <a href="/chat" class="glass-card p-10 flex flex-col items-center text-center hover-grow cursor-pointer text-decoration-none border-l-4 border-l-teal-400">
-        <div class="text-6xl mb-4">💬</div>
-        <h3 class="text-2xl font-bold text-teal-800 mb-2">Chat Companion</h3>
-        <p class="text-gray-600">A supportive, trauma-informed conversational companion that understands your current mood and offers self-care.</p>
-        <div class="mt-6 px-6 py-3 bg-teal-500 text-white rounded-full font-semibold">Start Chatting</div>
-      </a>
-      
-      <!-- Option B: Cognitive Survey -->
-      <a href="/survey" class="glass-card p-10 flex flex-col items-center text-center hover-grow cursor-pointer border-l-4 border-l-blue-400">
-        <div class="text-6xl mb-4">🧠</div>
-        <h3 class="text-2xl font-bold text-blue-800 mb-2">Cognitive Survey</h3>
-        <p class="text-gray-600">Take our standardized 20-question cognitive assessment to measure key mental parameters and receive a detailed profile.</p>
-        <div class="mt-6 px-6 py-3 bg-blue-500 text-white rounded-full font-semibold">Take Survey</div>
-      </a>
+  <main class="max-w-6xl mx-auto py-12 px-6">
+    <div class="animate-[fadeInUp_0.8s_ease-out]">
+      <h2 class="text-3xl font-bold text-[#2F3E46] mb-8 text-center drop-shadow-sm">How would you like to proceed?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+
+        <a href="/chat"
+          class="soft-card p-10 flex flex-col items-center text-center cursor-pointer text-decoration-none border-l-4 border-l-[#84a98c]">
+          <div class="text-5xl mb-6">💬</div>
+          <h3 class="text-2xl font-bold text-[#2F3E46] mb-4">Chat Companion</h3>
+          <p class="text-[#2F3E46] opacity-70 font-medium mb-8 leading-relaxed">A supportive conversational companion
+            that understands your current mood and offers gentle reflection.</p>
+          <div class="btn-primary shadow-sm">Enter Safe Space</div>
+        </a>
+
+        <a href="/survey"
+          class="soft-card p-10 flex flex-col items-center text-center cursor-pointer text-decoration-none border-l-4 border-l-[#F4A261]">
+          <div class="text-5xl mb-6">🌿</div>
+          <h3 class="text-2xl font-bold text-[#2F3E46] mb-4">Mental Assessment</h3>
+          <p class="text-[#2F3E46] opacity-70 font-medium mb-8 leading-relaxed">Take our structured cognitive assessment
+            to measure key parameters thoughtfully and securely.</p>
+          <div class="btn-primary shadow-sm">Begin Reflection</div>
+        </a>
+      </div>
     </div>
 
     <!-- HISTORY TABS -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-      
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-[fadeInUp_1.2s_ease-out]">
+
       <!-- Survey History -->
       <div>
-        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center">
-          <span class="mr-2">📊</span> Past Cognitive Profiles
+        <h2 class="text-2xl font-bold text-[#2F3E46] mb-6 flex items-center">
+          <span class="mr-3 text-accent-orange">📊</span> Cognitive Reflections
         </h2>
         {% if not surveys %}
-          <div class="glass-card p-6 text-center text-gray-500 text-sm">No cognitive surveys taken yet.</div>
+        <div class="bg-[#FDEDDC] opacity-70 p-6 text-center text-[#2F3E46] font-medium rounded-2xl">No reflections saved
+          yet.</div>
         {% else %}
-          <div class="space-y-4">
-            {% for survey in surveys %}
-              <div class="glass-card p-5 hover-grow">
-                <div class="flex justify-between items-center mb-3">
-                  <span class="text-xs text-gray-400 font-semibold uppercase">{{ survey.date_taken.strftime('%b %d, %Y') }}</span>
-                  <a href="/survey_result/{{ survey.id }}" class="text-blue-600 text-sm font-semibold hover:underline">View Details &rarr;</a>
-                </div>
-                <div class="flex justify-between items-end">
-                  <div>
-                    <span class="text-sm text-gray-500">Total Score:</span>
-                    <span class="text-xl font-bold text-blue-700 ml-1">{{ "%.2f"|format(survey.total_score) }}/5</span>
-                  </div>
-                  <div class="px-3 py-1 rounded-full text-xs font-bold {% if survey.category == 'High' %}bg-green-100 text-green-700{% elif survey.category == 'Medium' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">
-                    {{ survey.category }} Intelligence
-                  </div>
-                </div>
+        <div class="space-y-4">
+          {% for survey in surveys %}
+          <div class="soft-card p-6">
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs text-[#2F3E46] opacity-60 font-bold uppercase tracking-widest">{{
+                survey.date_taken.strftime('%b %d, %Y') }}</span>
+              <a href="/survey_result/{{ survey.id }}"
+                class="text-[#84A98C] font-bold text-sm tracking-wide hover:underline">Review &rarr;</a>
+            </div>
+            <div class="flex justify-between items-end">
+              <div>
+                <span class="text-sm text-[#2F3E46] opacity-80 font-medium">Clarity Score:</span>
+                <span class="text-2xl font-bold text-[#2F3E46] ml-2">{{ "%.2f"|format(survey.total_score) }}</span>
               </div>
-            {% endfor %}
+              <div
+                class="px-3 py-1 rounded-full text-xs font-bold bg-white text-[#2F3E46] shadow-sm border border-[#2F3E46]/5">
+                {{ survey.category }}
+              </div>
+            </div>
           </div>
+          {% endfor %}
+        </div>
         {% endif %}
       </div>
 
       <!-- Chat History -->
       <div>
-        <h2 class="text-2xl font-bold text-teal-800 mb-6 flex items-center">
-          <span class="mr-2">🌿</span> Past Chat Sessions
+        <h2 class="text-2xl font-bold text-[#2F3E46] mb-6 flex items-center">
+          <span class="mr-3 text-[#84A98C]">🌿</span> Chat Journeys
         </h2>
         {% if not sessions %}
-          <div class="glass-card p-6 text-center text-gray-500 text-sm">No conversations yet.</div>
+        <div class="bg-[#FDEDDC] opacity-70 p-6 text-center text-[#2F3E46] font-medium rounded-2xl">No journeys begun.
+        </div>
         {% else %}
-          <div class="space-y-4">
-            {% for session in sessions %}
-              <div class="glass-card p-5 hover-grow">
-                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
-                  {{ session.date_created.strftime('%b %d, %Y • %I:%M %p') }}
-                </p>
-                {% if session.mood %}
-                  <p class="text-lg font-bold text-teal-700 capitalize">{{ session.mood }}</p>
-                  <div class="flex items-center space-x-2 mt-2">
-                    <span class="text-xs font-medium text-gray-500">Severity:</span>
-                    <div class="w-24 bg-gray-200 rounded-full h-2">
-                      <div class="bg-teal-500 h-2 rounded-full" style="width: {{ session.severity * 10 }}%"></div>
-                    </div>
-                    <span class="text-xs font-bold text-teal-800">{{ session.severity }}/10</span>
-                  </div>
-                {% else %}
-                  <p class="text-gray-500 text-sm italic">No analysis triggered for this session.</p>
-                {% endif %}
+        <div class="space-y-4">
+          {% for session in sessions %}
+          <div
+            class="soft-card p-6 border-l-4 {% if session.mood %} border-[#E5989B] {% else %} border-[#2F3E46]/10 {% endif %}">
+            <p class="text-xs text-[#2F3E46] opacity-60 font-bold uppercase tracking-widest mb-3">
+              {{ session.date_created.strftime('%b %d, %Y • %I:%M %p') }}
+            </p>
+            {% if session.mood %}
+            <p class="text-xl font-bold text-[#2F3E46] capitalize mb-2">{{ session.mood }}</p>
+            <div class="flex items-center space-x-3">
+              <span class="text-xs text-[#2F3E46] opacity-70 font-medium uppercase">Intensity</span>
+              <div class="flex-1 bg-white rounded-full h-2 overflow-hidden shadow-inner">
+                <div class="bg-[#E5989B] h-2 rounded-full" style="width: {{ session.severity * 10 }}%"></div>
               </div>
-            {% endfor %}
+              <span class="text-sm font-bold text-[#2F3E46]">{{ session.severity }}/10</span>
+            </div>
+            {% else %}
+            <p class="text-[#2F3E46] opacity-60 text-sm font-medium italic">Quiet session. No analysis generated.</p>
+            {% endif %}
           </div>
+          {% endfor %}
+        </div>
         {% endif %}
       </div>
-      
+
     </div>
   </main>
+
+  <style>
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </body>
+
 </html>
